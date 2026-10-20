@@ -6,13 +6,19 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 15
+
     steps:
     - name: Checkout
       uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
 
     - name: Set up JDK
       uses: actions/setup-java@v6 
@@ -21,5 +27,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    # - name: Build & test
-    #   run: mvn -B -ntp verify
+    - name: Build, test & Sonar analysis
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: ./mvnw -B -ntp verify sonar:sonar
